@@ -210,7 +210,7 @@ def print_tfidf_matrix(matrix):
         print(row)
 
 
-# Les mots les moins importants en score
+#Les mots les moins importants en score
 
 def find_unimportant_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
     unimportant_words = set()
@@ -224,7 +224,7 @@ def find_unimportant_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
 
     return unimportant_words
 
-#Mot important en score
+# Mot important en score
 
 from typing import Dict
 
@@ -241,16 +241,14 @@ def find_most_important_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set
 def find_unimportant_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
     unimportant_words = set()
 
-    # Parcourir chaque mot dans le premier document
     first_document = list(tf_idf_scores.keys())[0]
     for word in tf_idf_scores[first_document]:
-        # Vérifier si le mot est présent dans tous les documents et si le score TF-IDF est égal à zéro
         if all(word in tf_idf_scores[filename] and tf_idf_scores[filename][word] == 0 for filename in tf_idf_scores):
             unimportant_words.add(word)
 
     return unimportant_words
 
-##Chirac mots
+# Chirac mots
 
 def most_common_words_by_president(tf_idf_scores: Dict[str, Dict[str, float]], president_name: str) -> set:
     common_words = set()
@@ -270,7 +268,7 @@ def most_common_words_by_president(tf_idf_scores: Dict[str, Dict[str, float]], p
 
     return common_words
 
-### Nation
+# Nation
 
 def load_text(file_path):
     with open(file_path, 'r', encoding="utf-8") as file:
@@ -336,12 +334,12 @@ def find_first_president_with_theme(directory_path):
         if president.endswith(".txt"):
             text = load_text(file_path)
             if detect_climate_ecology(text):
-                return president.split(".")[0]  # Retournez le nom du président sans l'extension .txt
+                return president.split(".")[0]
 
     return None
 
 
-#Par tous les présidents
+# Par tous les présidents
 
 from typing import Dict
 

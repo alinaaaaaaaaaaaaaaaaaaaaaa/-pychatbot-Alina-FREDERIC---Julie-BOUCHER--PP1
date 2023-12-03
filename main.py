@@ -63,10 +63,9 @@ print("la matrice TF-IDF après transposition :", len(transposed_tfidf_matrix), 
 print("#####Matrice TF-IDF avant transposition :####")
 #print_tfidf_matrix(tfidf_matrix)
 
-# Transposer la matrice TF-IDF si nécessaire
+# Transposer la matrice TF-IDF
 transposed_tfidf_matrix = transpose_matrix(tfidf_matrix)
 
-# Affichez la matrice TF-IDF après transposition
 print("######Matrice TF-IDF après transposition :#####")
 #print_tfidf_matrix(transposed_tfidf_matrix)
 
@@ -76,10 +75,9 @@ unimportant_words = find_unimportant_words(tf_idf_scores)
 print("Mots les moins importants (TF-IDF = 0) :", unimportant_words)
 
 
-#Mot important (TF idf
+# Mot important (TF-idf le plus élévé)
 from fonction import calculate_tf_idf, find_most_important_words
 
-# Trouver le(s) mot(s) ayant le score TD-IDF le plus élevé
 most_important_words = find_most_important_words(tf_idf_scores)
 print("Mot(s) ayant le score TF-IDF le plus élevé :", most_important_words)
 
@@ -97,15 +95,13 @@ print(f"Mot(s) le(s) plus répété(s) par le président {president_name} :", co
 
 from fonction import find_presidents_with_theme, load_text
 
-# Trouver tous les présidents parlant de la "nation"
 presidents_with_theme = find_presidents_with_theme(cleaned_directory)
 mentions_by_president = count_nation_mentions(cleaned_directory)
 
 for president, mentions in mentions_by_president.items():
     print(f"{president}: {mentions} mention/s de 'nation'")
 
-
-# Trouver le premier président à parler du climat et/ou de l'écologie
+#Climat
 premier_president = find_first_president_with_theme(cleaned_directory)
 
 if premier_president:
