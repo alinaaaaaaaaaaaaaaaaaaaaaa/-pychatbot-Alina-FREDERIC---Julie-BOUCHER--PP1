@@ -74,12 +74,12 @@ def occurrences(file_path):
 
     return word_occurrences_dict
 
-#IDF premier essaie
+#IDFtf premier essaie
 
 # def calculate_idf(corpus_directory):
 #     tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for
 #                            word in unique_words_in_document}
-
+#
 #     document_frequency = Counter()
 #     total_documents = 0
 #
@@ -100,40 +100,40 @@ def occurrences(file_path):
 #             document_frequency.update(unique_words_in_document)
 #
 #     idf_scores = {word: math.log(1 + (total_documents / (document_frequency[word]))) for word in document_frequency}
+
+
+    # tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
+    # return tf_idf_scores
+
+
+#TF*idf soit TF-IDF
+# def calculate_tf_idf(corpus_directory):
+#     document_frequency = Counter()
+#     total_documents = 0
+#     tf_scores = {}
+#
+#     for filename in os.listdir(corpus_directory):
+#         if filename.endswith(".txt"):
+#             total_documents += 1
+#
+#             file_path = os.path.join(corpus_directory, filename)
+#             unique_words_in_document = set()
+#
+#             with open(file_path, 'r', encoding="utf-8") as file:
+#                 for line in file:
+#                     cleaned_line = clean_line(line.lower())
+#                     words_in_line = cleaned_line.split()
+#                     unique_words_in_document.update(words_in_line)
+#
+#             # Assurez-vous de déclarer unique_words_in_document ici
+#             tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
+#             document_frequency.update(unique_words_in_document)
+#
+#     idf_scores = {word: math.log10(1 + (total_documents / (document_frequency[word]))) for word in document_frequency}
 #
 #
 #     tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
 #     return tf_idf_scores
-
-
-#TF*idf soit TF-IDF
-def calculate_tf_idf(corpus_directory):
-    document_frequency = Counter()
-    total_documents = 0
-    tf_scores = {}
-
-    for filename in os.listdir(corpus_directory):
-        if filename.endswith(".txt"):
-            total_documents += 1
-
-            file_path = os.path.join(corpus_directory, filename)
-            unique_words_in_document = set()
-
-            with open(file_path, 'r', encoding="utf-8") as file:
-                for line in file:
-                    cleaned_line = clean_line(line.lower())
-                    words_in_line = cleaned_line.split()
-                    unique_words_in_document.update(words_in_line)
-
-            # Assurez-vous de déclarer unique_words_in_document ici
-            tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
-            document_frequency.update(unique_words_in_document)
-
-    idf_scores = {word: math.log(1 + (total_documents / (document_frequency[word]))) for word in document_frequency}
-
-
-    tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
-    return tf_idf_scores
 
 def clean_line(line):
     cleaned_line = line.replace("'", " ")
@@ -161,8 +161,41 @@ def calculate_idf(corpus_directory):
             for word in unique_words_in_document:
                 document_frequency[word] = document_frequency.get(word, 0) + 1
 
-    idf_scores = {word: math.log(total_documents / (1 + document_frequency[word])) for word in document_frequency}
+    idf_scores = {word: (math.log10(total_documents / document_frequency[word])) for word in document_frequency}
     return idf_scores
+
+def calculate_idf_tf(corpus_directory):
+    document_frequency = Counter()
+    total_documents = 0
+    tf_scores = {}
+
+    for filename in os.listdir(corpus_directory):
+        if filename.endswith(".txt"):
+            total_documents += 1
+
+            file_path = os.path.join(corpus_directory, filename)
+            unique_words_in_document = set()
+
+            with open(file_path, 'r', encoding="utf-8") as file:
+                for line in file:
+                    cleaned_line = clean_line(line)
+                    words_in_line = cleaned_line.split()
+                    unique_words_in_document.update(words_in_line)
+
+                # Calcul du score TF pour chaque mot dans le document
+                tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
+
+                # Mise à jour de la fréquence des termes dans tous les documents
+                document_frequency.update(unique_words_in_document)
+
+    # Calcul du score IDF pour chaque mot
+    idf_scores = {word: math.log10((total_documents / (document_frequency[word]))) for word in document_frequency}
+
+    # Calcul du score TF-IDF pour chaque document
+    tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
+
+    return idf_scores, tf_idf_scores
+
 
 #Matrice
 
@@ -182,7 +215,11 @@ def generate_tfidf_matrix(corpus_directory):
                     words_in_document = ' '.join(cleaned_lines).split()
 
                     if len(words_in_document) > 0:
-                        tfidf_row = [idf_scores[word] * words_in_document.count(word) / len(words_in_document) for word in unique_words]
+                        tfidf_row = [0] * len(unique_words)
+                        for i in range(len(unique_words)):
+                            word = unique_words[i]
+                            score = idf_scores[word] * words_in_document.count(word) / len(words_in_document)
+                            tfidf_row[i] = round(score, 2)
                         tfidf_matrix.append(tfidf_row)
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
@@ -198,7 +235,6 @@ def transpose_matrix(matrix):
 
     transposed_matrix = [[0] * num_rows for _ in range(num_cols)]
 
-
     for i in range(num_rows):
         for j in range(num_cols):
             transposed_matrix[j][i] = matrix[i][j]
@@ -208,7 +244,6 @@ def transpose_matrix(matrix):
 def print_tfidf_matrix(matrix):
     for row in matrix:
         print(row)
-
 
 #Les mots les moins importants en score
 

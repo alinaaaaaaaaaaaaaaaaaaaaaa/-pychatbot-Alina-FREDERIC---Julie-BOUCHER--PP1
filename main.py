@@ -41,12 +41,14 @@ for word, idf_score in idf_scores.items():
 
 #TF IDF
 # Pour TF-IDF scores soit TF * IDF
-tf_idf_scores = calculate_tf_idf(cleaned_directory)
 
+idf_scores, tf_idf_scores = calculate_idf_tf(cleaned_directory)
+
+    # Accédez aux éléments du tuple correctement
 for document, scores in tf_idf_scores.items():
-    print(f"Document: {document}, TF-IDF scores: {scores}")
-    for word, tf_idf_score in scores.items():
-        print(f"  Mot : {word}, Score TF-IDF : {tf_idf_score}")
+        print(f"Document: {document}, TF-IDF scores: {scores}")
+        for word, tf_idf_score in scores.items():
+            print(f"  Mot : {word}, Score TF-IDF : {tf_idf_score}")
 
 #Matrice
 tfidf_matrix = generate_tfidf_matrix(cleaned_directory)
@@ -58,32 +60,31 @@ print("la matrice TF-IDF avant transposition :", len(tfidf_matrix), "x", len(tfi
 transposed_tfidf_matrix = transpose_matrix(tfidf_matrix)
 print("la matrice TF-IDF après transposition :", len(transposed_tfidf_matrix), "x", len(transposed_tfidf_matrix[0]))
 
-
 # Affichez la matrice TF-IDF
 print("#####Matrice TF-IDF avant transposition :####")
-#print_tfidf_matrix(tfidf_matrix)
+print_tfidf_matrix(tfidf_matrix)
 
 # Transposer la matrice TF-IDF
 transposed_tfidf_matrix = transpose_matrix(tfidf_matrix)
 
 print("######Matrice TF-IDF après transposition :#####")
-#print_tfidf_matrix(transposed_tfidf_matrix)
+print_tfidf_matrix(transposed_tfidf_matrix)
 
 # Les mots les moins important
-from fonction import calculate_tf_idf, find_unimportant_words
+from fonction import calculate_idf_tf, find_unimportant_words
 unimportant_words = find_unimportant_words(tf_idf_scores)
 print("Mots les moins importants (TF-IDF = 0) :", unimportant_words)
 
 
 # Mot important (TF-idf le plus élévé)
-from fonction import calculate_tf_idf, find_most_important_words
+from fonction import calculate_idf_tf, find_most_important_words
 
 most_important_words = find_most_important_words(tf_idf_scores)
 print("Mot(s) ayant le score TF-IDF le plus élevé :", most_important_words)
 
 
 #Chirac mots
-from fonction import calculate_tf_idf, most_common_words_by_president
+from fonction import calculate_idf_tf, most_common_words_by_president
 president_name = "Chirac"
 common_words = most_common_words_by_president(tf_idf_scores, president_name)
 
@@ -119,7 +120,7 @@ print(common_words_except_unimportant)
 while True:
         print("\nMenu:")
         print("----Les demandes de base----")
-        print("1. Extraire les noms des présidents")
+        print("1. Extraire les noms de famille des présidents")
         print("2. Associer nom et prénom des présidents")
         print("3. Afficher les prénoms des présidents")
         print("4. Afficher les occurrences de chaque mot dans les discours")
