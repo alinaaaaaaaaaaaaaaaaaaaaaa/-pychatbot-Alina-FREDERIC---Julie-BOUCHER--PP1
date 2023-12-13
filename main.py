@@ -166,11 +166,12 @@ while True:
 
         elif choice == '5':
             corpus_directory = "./cleaned"
-            tf_idf_scores = calculate_tf_idf(corpus_directory)
+            idf_scores, tf_idf_scores = calculate_idf_tf(corpus_directory)
             for document, scores in tf_idf_scores.items():
                 print(f"Document : {document}")
                 for word, tf_idf_score in scores.items():
                     print(f"  Mot : {word}, Score TF-IDF : {tf_idf_score}")
+
 
         elif choice == '6':
             unimportant_words = find_unimportant_words(tf_idf_scores)
