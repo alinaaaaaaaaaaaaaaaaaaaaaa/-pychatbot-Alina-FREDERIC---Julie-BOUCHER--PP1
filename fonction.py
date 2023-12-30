@@ -274,14 +274,20 @@ def find_most_important_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set
 
 # Mot moins important
 def find_unimportant_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
-    unimportant_words = set()
+        unimportant_words = set()
 
-    first_document = list(tf_idf_scores.keys())[0]
-    for word in tf_idf_scores[first_document]:
-        if all(word in tf_idf_scores[filename] and tf_idf_scores[filename][word] == 0 for filename in tf_idf_scores):
-            unimportant_words.add(word)
+        # Utilisez n'importe quel document pour obtenir la liste des mots
+        words_in_first_document = list(tf_idf_scores.values())[0]
 
-    return unimportant_words
+        for word in words_in_first_document:
+            # Vérifier si le mot est présent dans tous les documents et si le score TF-IDF est égal à zéro
+            if all(word in document and document[word] == 0 for document in tf_idf_scores.values()):
+                unimportant_words.add(word)
+
+        print("Mots non importants :", unimportant_words)  # Ajoutez cette ligne
+
+        return unimportant_words
+
 
 # Chirac mots
 
@@ -309,9 +315,6 @@ def load_text(file_path):
     with open(file_path, 'r', encoding="utf-8") as file:
         return file.read()
 
-def load_text(file_path):
-    with open(file_path, 'r', encoding="utf-8") as file:
-        return file.read()
 
 def detect_nation(text):
     keywords = ["nation","Nation"]
@@ -343,8 +346,11 @@ def count_nation_mentions(directory_path):
     for president in presidents:
         file_path = os.path.join(directory_path, president)
         if president.endswith(".txt"):
+            # Extraire le nom du président du nom du fichier
+            president_name = president.split("_")[2].split(".")[0]
+
             text = load_text(file_path)
-            mentions_by_president[president] = text.lower().split().count("nation")
+            mentions_by_president[president_name] = text.lower().split().count("nation")
 
     return mentions_by_president
 
@@ -367,27 +373,93 @@ def find_first_president_with_theme(directory_path):
     for president in presidents:
         file_path = os.path.join(directory_path, president)
         if president.endswith(".txt"):
+            # Extraire le nom du président du nom du fichier
+            president_name = president.split("_")[2].split(".")[0]
+
             text = load_text(file_path)
             if detect_climate_ecology(text):
-                return president.split(".")[0]
+                return president_name
 
     return None
 
 
-# Par tous les présidents
+from typing import Dict, Set
 
-from typing import Dict
-
-def find_common_words_except_unimportant(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
+def find_common_words_except_unimportant(tf_idf_scores: Dict[str, Dict[str, float]]) -> Set[str]:
     unimportant_words = find_unimportant_words(tf_idf_scores)
     first_document = list(tf_idf_scores.keys())[0]
-    common_words_except_unimportant = set()
+    common_words_except_unimportant = set(tf_idf_scores[first_document].keys())
 
-    for word in tf_idf_scores[first_document]:
-        if word not in unimportant_words and all(word in tf_idf_scores[filename] for filename in tf_idf_scores):
-            common_words_except_unimportant.add(word)
+    for filename in tf_idf_scores:
+        common_words_except_unimportant.intersection_update(tf_idf_scores[filename].keys())
+
+    # Retirez les mots non importants
+    common_words_except_unimportant.difference_update(unimportant_words)
 
     return common_words_except_unimportant
+
+
+
+#### Partie 2 ####
+import string
+
+def tokenize_question(question, remove_stopwords=False):
+    print(f"Question originale : {question}")
+
+    question = question.lower()
+    print(f"Après conversion en minuscules : {question}")
+
+    # Suppression de la ponctuation en conservant les espaces autour des articles
+    question = ''.join(char if char not in string.punctuation or (char in {' '} and "'" not in question[i-1:i+2]) else ' ' for i, char in enumerate(question))
+    print(f"Après suppression de la ponctuation : {question}")
+
+    question = ' '.join(question.split())
+    print(f"Après suppression des espaces supplémentaires : {question}")
+
+    # Suppression de l'apostrophe
+    question = question.replace("'", "")
+    print(f"Après suppression de l'apostrophe : {question}")
+
+    if remove_stopwords:
+        stopwords = ["le", "l", "la", "les", "de", "du", "des", "et", "et", "ou", "mais", "si", "que"]
+        question_words = [word for word in question.split() if word not in stopwords]
+    else:
+        question_words = question.split()
+
+    print(f"Liste des mots finaux : {question_words}")
+    return question_words
+
+
+
+
+
+def chercher_mots_dans_dossier(chemin_dossier, liste_mots):
+    resultats = {}
+
+    # Parcours de tous les fichiers dans le dossier
+    for nom_fichier in os.listdir(chemin_dossier):
+        if nom_fichier.endswith(".txt"):
+            chemin_fichier = os.path.join(chemin_dossier, nom_fichier)
+
+            # Ouverture et lecture du fichier
+            with open(chemin_fichier, 'r', encoding='utf-8') as fichier:
+                contenu = fichier.read()
+
+                # Recherche des occurrences de mots dans le contenu du fichier
+                occurrences = {}
+                for mot in liste_mots:
+                    occurrences[mot] = contenu.count(mot)
+
+                # Ajout des résultats au dictionnaire des résultats
+                if nom_fichier not in resultats:
+                    resultats[nom_fichier] = occurrences
+                else:
+                    resultats[nom_fichier].update(occurrences)
+
+    return resultats
+
+# Exemple d'utilisation
+
 
 
 
