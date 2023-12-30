@@ -62,14 +62,14 @@ print("la matrice TF-IDF après transposition :", len(transposed_tfidf_matrix), 
 
 # Affichez la matrice TF-IDF
 print("#####Matrice TF-IDF avant transposition :####")
-#print_tfidf_matrix(tfidf_matrix)
+print_tfidf_matrix(tfidf_matrix)
 
 # Transposer la matrice TF-IDF
 transposed_tfidf_matrix = transpose_matrix(tfidf_matrix)
 
 
 print("######Matrice TF-IDF après transposition :#####")
-#print_tfidf_matrix(transposed_tfidf_matrix)
+print_tfidf_matrix(transposed_tfidf_matrix)
 
 # Les mots les moins important
 from fonction import calculate_idf_tf, find_unimportant_words
@@ -204,9 +204,9 @@ else:
 
 ####Partie 2###
 
-print("PARTIE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+print("\nPARTIE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
       ""
-      "")
+      ":\n")
 question_text = "Quelle est l'importance de l'écologie dans la politique actuelle?"
 question_tokens = tokenize_question(question_text, remove_stopwords=True)
 print(question_tokens)
@@ -220,3 +220,28 @@ for fichier, occurrences in resultats.items():
     for mot, count in occurrences.items():
         if count != 0 :
             print(f"{mot}: {count} fois")
+
+
+tf_idf_vector = calculate_tf_idf_vector(question_tokens, idf_scores, tfidf_matrix)
+# Affichez le résultat ou utilisez-le comme vous le souhaitez
+print("Vecteur TF-IDF pour la question:", tf_idf_vector)
+
+#4
+
+similarites = []
+
+for vecteur in tfidf_matrix:
+    similarity = cosine_similarity(tf_idf_vector, vecteur)
+
+    if isinstance(similarity, float):
+        similarites.append(similarity)
+        print(f"Similarité avec le vecteur {vecteur} : {similarity}")
+    else:
+        print(f"Similarité avec le vecteur {vecteur} : {similarity}")
+
+# Si le calcul est possible, trouver l'indice du vecteur le plus similaire
+if similarites:
+    indice_max_similarity = max(range(len(similarites)), key=similarites.__getitem__)
+    print(f"\nLe vecteur le plus similaire dans la matrice est à l'indice {indice_max_similarity}")
+    print(f"Similarité : {similarites[indice_max_similarity]}")
+

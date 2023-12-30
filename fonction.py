@@ -431,8 +431,6 @@ def tokenize_question(question, remove_stopwords=False):
 
 
 
-
-
 def chercher_mots_dans_dossier(chemin_dossier, liste_mots):
     resultats = {}
 
@@ -458,7 +456,56 @@ def chercher_mots_dans_dossier(chemin_dossier, liste_mots):
 
     return resultats
 
-# Exemple d'utilisation
+def calculate_tf_idf_vector(question_tokens, idf_scores, tfidf_matrix):
+    tf_idf_vector = []
+
+    # Calculer le nombre total de mots dans la question
+    total_words_in_question = len(question_tokens)
+
+    # Calculer le TF pour chaque mot de la question
+    for word in idf_scores.keys():
+        tf = question_tokens.count(word) / total_words_in_question
+
+        # Calculer le score TF-IDF pour le mot en multipliant TF par IDF
+        tf_idf = tf * idf_scores[word]
+        tf_idf_vector.append(tf_idf)
+
+    return tf_idf_vector
+
+
+#4
+
+import math
+
+
+def norme_vecteur(vecteur):
+    # Calculer la norme (longueur) du vecteur
+    return math.sqrt(sum(x ** 2 for x in vecteur))
+
+
+def cosine_similarity(vecteur_a, vecteur_b):
+    # Calculer le produit scalaire entre les vecteurs A et B
+    produit_scalaire = sum(x * y for x, y in zip(vecteur_a, vecteur_b))
+
+    # Calculer la norme du vecteur B
+    norme_b = norme_vecteur(vecteur_b)
+
+    # Vérifier si le dénominateur est nul
+    if norme_b == 0:
+        return "Le calcul est impossible car le dénominateur est nul."
+
+    # Calculer la norme du vecteur A
+    norme_a = norme_vecteur(vecteur_a)
+
+    # Calculer la similarité cosinus
+    similarity = produit_scalaire / (norme_a * norme_b)
+
+    return similarity
+
+
+
+
+
 
 
 
