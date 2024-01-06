@@ -74,71 +74,29 @@ def occurrences(file_path):
 
     return word_occurrences_dict
 
-#IDFtf premier essaie
-
-# def calculate_idf(corpus_directory):
-#     tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for
-#                            word in unique_words_in_document}
-#
-#     document_frequency = Counter()
-#     total_documents = 0
-#
-#     for filename in os.listdir(corpus_directory):
-#         if filename.endswith(".txt"):
-#             total_documents += 1
-#
-#             file_path = os.path.join(corpus_directory, filename)
-#             unique_words_in_document = set()
-#
-#             with open(file_path, 'r', encoding="utf-8") as file:
-#                 for line in file:
-#                     cleaned_line = clean_line(line.lower())
-#                     words_in_line = cleaned_line.split()
-#                     unique_words_in_document.update(words_in_line)
-#
-#             tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
-#             document_frequency.update(unique_words_in_document)
-#
-#     idf_scores = {word: math.log(1 + (total_documents / (document_frequency[word]))) for word in document_frequency}
-
-
-    # tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
-    # return tf_idf_scores
-
-
-#TF*idf soit TF-IDF
-# def calculate_tf_idf(corpus_directory):
-#     document_frequency = Counter()
-#     total_documents = 0
-#     tf_scores = {}
-#
-#     for filename in os.listdir(corpus_directory):
-#         if filename.endswith(".txt"):
-#             total_documents += 1
-#
-#             file_path = os.path.join(corpus_directory, filename)
-#             unique_words_in_document = set()
-#
-#             with open(file_path, 'r', encoding="utf-8") as file:
-#                 for line in file:
-#                     cleaned_line = clean_line(line.lower())
-#                     words_in_line = cleaned_line.split()
-#                     unique_words_in_document.update(words_in_line)
-#
-#             # Assurez-vous de déclarer unique_words_in_document ici
-#             tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
-#             document_frequency.update(unique_words_in_document)
-#
-#     idf_scores = {word: math.log10(1 + (total_documents / (document_frequency[word]))) for word in document_frequency}
-#
-#
-#     tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
-#     return tf_idf_scores
-
 def clean_line(line):
     cleaned_line = line.replace("'", " ")
     cleaned_line = cleaned_line.translate(str.maketrans("", "", string.punctuation))
     return cleaned_line
+
+def compute_tf(ch):
+    """ prend en paramètre une chaîne de caractères correspondant au contenu d'un fichier
+    et renvoie sa matrice (dictionnaire) TF """
+
+    tf_score = {}
+
+    # extraction de tous les mots de la chaîne de caractère "ch"
+    mots = ch.split(" ")
+
+    # création d'un score tf pour chaque mot de la chaîne "ch"
+    for mot in mots:
+        tf_score[mot] = float(tf_score.get(mot, 0) + 1)
+
+    # suppression des chaînes de caractères vides
+    if '' in tf_score:
+        del tf_score['']
+
+    return tf_score
 
 def calculate_idf(corpus_directory):
 
@@ -164,86 +122,72 @@ def calculate_idf(corpus_directory):
     idf_scores = {word: (math.log10(total_documents / document_frequency[word])) for word in document_frequency}
     return idf_scores
 
-def calculate_idf_tf(corpus_directory):
-    document_frequency = Counter()
-    total_documents = 0
-    tf_scores = {}
+def compute_idf(repertoire):
+    """ prend en paramètre un répertoire, calcule le score IDF pour chaque mot du corpus
+    et renvoie la matrice (dictionnaire) IDF du corpus """
 
-    for filename in os.listdir(corpus_directory):
-        if filename.endswith(".txt"):
-            total_documents += 1
+    matrice_tdf = {}
 
-            file_path = os.path.join(corpus_directory, filename)
-            unique_words_in_document = set()
+    # extraction des fichiers de "dossier"
+    L_docs = list_of_files(repertoire, "txt")
+    nb_doc = len(L_docs)
 
-            with open(file_path, 'r', encoding="utf-8") as file:
-                for line in file:
-                    cleaned_line = clean_line(line)
-                    words_in_line = cleaned_line.split()
-                    unique_words_in_document.update(words_in_line)
+    occurrences_mots_dans_corpus = {}
 
-                # Calcul du score TF pour chaque mot dans le document
-                tf_scores[filename] = {word: words_in_line.count(word) / len(words_in_line) if len(words_in_line) > 0 else 0 for word in unique_words_in_document}
+    for fichier in L_docs:
 
-                # Mise à jour de la fréquence des termes dans tous les documents
-                document_frequency.update(unique_words_in_document)
+        with open(repertoire + "/" + fichier, "r") as f:
 
-    # Calcul du score IDF pour chaque mot
-    idf_scores = {word: math.log10((total_documents / (document_frequency[word]))) for word in document_frequency}
-
-    # Calcul du score TF-IDF pour chaque document
-    tf_idf_scores = {document: {word: tf_scores[document][word] * idf_scores[word] for word in tf_scores[document]} for document in tf_scores}
-
-    return idf_scores, tf_idf_scores
+            # calcul du nombre de documents dans lesquels chaque mots du le corpus apparait
+            mots_fichier = set(f.read().split())
+            for mot in mots_fichier:
+                occurrences_mots_dans_corpus[mot] = occurrences_mots_dans_corpus.get(mot, 0) + 1
 
 
-#Matrice
+    # remplissage de la matrice tf-idf
+    for mot, occurrence in occurrences_mots_dans_corpus.items():
+        matrice_tdf[mot] = math.log10(nb_doc / occurrence)
 
-def generate_tfidf_matrix(corpus_directory):
-    idf_scores = calculate_idf(corpus_directory)
-    unique_words = sorted(idf_scores.keys())
+    return matrice_tdf
 
-    tfidf_matrix = []
+def creation_matrices_tf_idf(repertoire):
+    """ prend en paramètre un répertoire et renvoie les matrices TF et IDF de celui-ci """
 
-    for filename in os.listdir(corpus_directory):
-        if filename.endswith(".txt"):
-            file_path = os.path.join(corpus_directory, filename)
+    L_doc = list_of_files(repertoire, "txt")
 
-            try:
-                with open(file_path, 'r', encoding="utf-8") as file:
-                    cleaned_lines = [clean_line(line.lower()) for line in file]
-                    words_in_document = ' '.join(cleaned_lines).split()
+    # création de la matrice IDF
+    matrice_idf = compute_idf(repertoire)
 
-                    if len(words_in_document) > 0:
-                        tfidf_row = [0] * len(unique_words)
-                        for i in range(len(unique_words)):
-                            word = unique_words[i]
-                            score = idf_scores[word] * words_in_document.count(word) / len(words_in_document)
-                            tfidf_row[i] = round(score, 2)
-                        tfidf_matrix.append(tfidf_row)
-            except Exception as e:
-                print(f"Error processing {file_path}: {e}")
+    # création de la matrice TF
+    matrice_tf = dict.fromkeys(L_doc, None)
+    for fichier in L_doc:
+        with open("./" + repertoire + "/" + fichier, "r") as f:
 
-    return tfidf_matrix
+            texte_fichier = f.read()
+            matrice_tf[fichier] = compute_tf(texte_fichier)
 
-#Transposition de la matrice
+    return matrice_tf, matrice_idf
 
-def transpose_matrix(matrix):
+def compute_tfidf(repertoire):
+    """ prend en paramètre un répertoire et renvoie la matrice TF-IDF
+    (dictionnaire de dictionnaire du type { fichier : { mot1 : score1, mot2 : score2 } } )
+     de chaque mot du corpus dans "dossier" """
 
-    num_rows = len(matrix)
-    num_cols = len(matrix[0])
+    L_doc = list_of_files(repertoire, "txt")
 
-    transposed_matrix = [[0] * num_rows for _ in range(num_cols)]
+    # création des matrices IDF et TF
+    matrice_tf, matrice_idf = creation_matrices_tf_idf(repertoire)
 
-    for i in range(num_rows):
-        for j in range(num_cols):
-            transposed_matrix[j][i] = matrix[i][j]
+    matrice_tfidf = {}
 
-    return transposed_matrix
+    # on remplie la matrice TF-IDF
+    for fichier in L_doc:
+        matrice_tfidf[fichier] = {}
+        for mot in matrice_idf.keys():
+            matrice_tfidf[fichier][mot] = matrice_tf[fichier].get(mot, 0) * matrice_idf[mot]
 
-def print_tfidf_matrix(matrix):
-    for row in matrix:
-        print(row)
+    return matrice_tfidf
+
 
 #Les mots les moins importants en score
 
@@ -261,7 +205,6 @@ def find_unimportant_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
 
 # Mot important en score
 
-from typing import Dict
 
 def find_most_important_words(tf_idf_scores: Dict[str, Dict[str, float]]) -> set:
     most_important_words = set()
@@ -426,9 +369,28 @@ def tokenize_question(question, remove_stopwords=False):
     else:
         question_words = question.split()
 
-    print(f"Liste des mots finaux : {question_words}")
     return question_words
 
+def tokenize_question2(question, remove_stopwords=False):
+    print(f"Question originale : {question}")
+
+    question = question.lower()
+
+    # Suppression de la ponctuation en conservant les espaces autour des articles
+    question = ''.join(char if char not in string.punctuation or (char in {' '} and "'" not in question[i-1:i+2]) else ' ' for i, char in enumerate(question))
+
+    question = ' '.join(question.split())
+
+    # Suppression de l'apostrophe
+    question = question.replace("'", "")
+
+    if remove_stopwords:
+        stopwords = ["le", "l", "la", "les", "de", "du", "des", "et", "et", "ou", "mais", "si", "que"]
+        question_words = [word for word in question.split() if word not in stopwords]
+    else:
+        question_words = question.split()
+
+    return question_words
 
 
 def chercher_mots_dans_dossier(chemin_dossier, liste_mots):
@@ -456,7 +418,7 @@ def chercher_mots_dans_dossier(chemin_dossier, liste_mots):
 
     return resultats
 
-def calculate_tf_idf_vector(question_tokens, idf_scores, tfidf_matrix):
+def calculate_tf_idf_vector(question_tokens, idf_scores):
     tf_idf_vector = []
 
     # Calculer le nombre total de mots dans la question
