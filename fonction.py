@@ -1,8 +1,8 @@
 import os # manipulation de fichiers, navigation dans les répertoires, exécution de commandes système.
-import re
+import re #motif qui aide pour la recherche
 from typing import Dict
-import string
-from collections import Counter
+import string #manipulation de chaînes de caractères.
+from collections import Counter # ompter le nombre d'occurrences des éléments
 import math
 
 

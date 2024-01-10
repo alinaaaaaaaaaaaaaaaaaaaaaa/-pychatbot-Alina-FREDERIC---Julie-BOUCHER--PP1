@@ -27,10 +27,9 @@ while True :
         print("12. Trouver le premier président parlant du climat et/ou de l'écologie")
         print("----Partie 2 ----")
         print("13.Tokenisation d'une question et recherche des mots de la question dans le Corpus ")
-        print("14.Calcul du vecteur TF-IDF pour les termes de la question : ")
-        print("15. Quitter")
+        print("14. Quitter")
 
-        choice = input("Choisissez une option (1-12): ")
+        choice = input("Choisissez une option (1-14): ")
 
         if choice == '1':
             files_names = list_of_files(directory, file_extension)
@@ -69,7 +68,7 @@ while True :
             if fichier in list_of_files(cleaned_directory, "txt"):
                 with open("./" + cleaned_directory + "/" + fichier) as f:
                     texte = f.read()
-                x=compute_tf(texte)
+                x=tf(texte)
                 print(x)
                 print("La matrice TF du fichier", fichier, "a été calculée")
             else:
@@ -124,20 +123,12 @@ while True :
                     if count != 0:
                         print(f"{mot}: {count} fois")
 
+
         elif choice == '14':
-
-            idf_scores = tfidf(cleaned_directory)
-
-            question_text = input("Saisir votre phrase:")
-            question_tokens = tokenize_question2(question_text, remove_stopwords=True)
-            tf_idf_vector = calculate_tf_idf_vector(question_tokens, idf_scores)
-            print("Vecteur TF-IDF pour la question:", tf_idf_vector)
-
-        elif choice == '15':
             print("Merci d'avoir utilisé le programme. Au revoir!")
             break
 
-        elif choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]:
+        elif choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]:
             print("Cette commande n'existe pas")
 
 #
