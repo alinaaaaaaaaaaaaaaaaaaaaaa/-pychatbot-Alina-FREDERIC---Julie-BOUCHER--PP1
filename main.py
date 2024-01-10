@@ -2,27 +2,12 @@ from fonction import *
 
 if __name__ == "__main__":
 
-
     directory = "./speeches"
     file_extension = "txt"
     cleaned_directory = "./cleaned"
 
-# la liste des noms de fichiers
-files_names = list_of_files(directory, file_extension)
-
-#Extraire les noms des présidents
-president_names = extract_president_names(files_names)
-
-#Associer nom et prénom
-nom_prenom_president={"Chirac": "Jacques" , "Giscard dEstaing": "Valéry", "Hollande" : "Francois" , "Mitterand": "Francois","Macron" : "Emmanuel", "Sarkosy"  : "Nicolas" }
-
-
-# Obtenir la liste des noms de fichiers dans le répertoire nettoyé
-files_names = list_of_files(cleaned_directory, "txt")
-
-
 # Menu
-while True:
+while True :
         print("\nMenu:")
         print("----Les demandes de base----")
         print("1. Extraire les noms de famille des présidents")
@@ -42,26 +27,25 @@ while True:
         print("12. Trouver le premier président parlant du climat et/ou de l'écologie")
         print("----Partie 2 ----")
         print("13.Tokenisation d'une question et recherche des mots de la question dans le Corpus ")
-        print("14. 3. Calcul du vecteur TF-IDF pour les termes de la question : ")
-
-        print("1. Quitter")
+        print("14.Calcul du vecteur TF-IDF pour les termes de la question : ")
+        print("15. Quitter")
 
         choice = input("Choisissez une option (1-12): ")
 
         if choice == '1':
-            directory = "./speeches"
-            file_extension = "txt"
             files_names = list_of_files(directory, file_extension)
             president_names = extract_president_names(files_names)
             print("Noms des présidents extraits :", president_names)
 
         elif choice == '2':
+            nom_prenom_president = {"Chirac": "Jacques", "Giscard dEstaing": "Valéry", "Hollande": "Francois",
+                                    "Mitterand": "Francois", "Macron": "Emmanuel", "Sarkosy": "Nicolas"}
             for nom, prenom in nom_prenom_president.items():
                 print(f"{prenom} {nom}")
 
 
         elif choice == '3':
-            prenom_president = {"Chirac": "Jacques", "Giscard dEstaing": "Valéry", "Hollande": "Francois",
+            nom_prenom_president = {"Chirac": "Jacques", "Giscard dEstaing": "Valéry", "Hollande": "Francois",
                                     "Mitterand": "Francois", "Macron": "Emmanuel", "Sarkosy": "Nicolas"}
             for val in nom_prenom_president.values():
                 print(val)
@@ -73,13 +57,13 @@ while True:
                 word_occurrences = occurrences(file_path)
                 print(f"Occurrences dans {filename}: {word_occurrences}")
 
-        if choice == "5":
+        if choice == '5':
             # calculer la matrice IDF d'un corpus de documents
-            x = compute_idf(cleaned_directory)
+            x = idf(cleaned_directory)
             print("La matrice IDF du corpus a été calculée")
             print(x)
 
-        elif choice == "6":
+        elif choice == '6':
             # calculer la matrice TF d'un fichier
             fichier = input("saisir le nom d'un fichier (déjà prétraité) : ")
             if fichier in list_of_files(cleaned_directory, "txt"):
@@ -91,23 +75,23 @@ while True:
             else:
                 print("Le fichier n'existe pas")
 
-        elif choice == "7":
+        elif choice == '7':
             # calculer la matrice TF-IDF d'un corpus de documents
-            x = compute_tfidf(cleaned_directory)
+            x = tfidf(cleaned_directory)
             print(x)
             print("La matrice TF-TDF du corpus a été calculée")
 
         elif choice == '8':
-            x = compute_tfidf(cleaned_directory)
+            x = tfidf(cleaned_directory)
             unimportant_words = find_unimportant_words(x)
 
         elif choice == '9':
-            x = compute_tfidf(cleaned_directory)
+            x = tfidf(cleaned_directory)
             most_important_words = find_most_important_words(x)
             print("Mot(s) ayant le score TF-IDF le plus élevé :", most_important_words)
 
         elif choice == '10':
-            x = compute_tfidf(cleaned_directory)
+            x = tfidf(cleaned_directory)
             president_name = input("Entrez le nom du président : ")
             common_words = most_common_words_by_president(x, president_name)
             print(f"Mot(s) le(s) plus répété(s) par le président {president_name} :", common_words)
@@ -132,7 +116,7 @@ while True:
             print(f"Liste des mots finaux : {question_tokens}")
 
             mots_a_chercher = question_tokens
-            resultats = chercher_mots_dans_dossier(cleaned_directory, mots_a_chercher)
+            resultats = find_word(cleaned_directory, mots_a_chercher)
 
             for fichier, occurrences in resultats.items():
                 print(f"\nOccurrences dans le fichier {fichier}:")
@@ -142,53 +126,48 @@ while True:
 
         elif choice == '14':
 
-            idf_scores = compute_idf(cleaned_directory)
+            idf_scores = tfidf(cleaned_directory)
 
             question_text = input("Saisir votre phrase:")
             question_tokens = tokenize_question2(question_text, remove_stopwords=True)
             tf_idf_vector = calculate_tf_idf_vector(question_tokens, idf_scores)
-            # Affichez le résultat ou utilisez-le comme vous le souhaitez
             print("Vecteur TF-IDF pour la question:", tf_idf_vector)
 
-
-
-        elif choice == '17':
+        elif choice == '15':
             print("Merci d'avoir utilisé le programme. Au revoir!")
             break
 
-        else:
-            print("Choix non valide. Veuillez entrer un numéro entre 1 et 11.")
+        elif choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]:
+            print("Cette commande n'existe pas")
 
-####Partie 2###
-
-print("\nPARTIE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-      ""
-      ":\n")
-
-
-
-tf_idf_vector = calculate_tf_idf_vector(question_tokens, idf_scores, tfidf_matrix)
-# Affichez le résultat ou utilisez-le comme vous le souhaitez
-print("Vecteur TF-IDF pour la question:", tf_idf_vector)
-
-#4
-
-similarites = []
-
-for vecteur in tfidf_matrix:
-    similarity = cosine_similarity(tf_idf_vector, vecteur)
-
-    if isinstance(similarity, float):
-        similarites.append(similarity)
-        print(f"Similarité avec le vecteur {vecteur} : {similarity}")
-    else:
-        print(f"Similarité avec le vecteur {vecteur} : {similarity}")
-
-# Si le calcul est possible, trouver l'indice du vecteur le plus similaire
-if similarites:
-    indice_max_similarity = max(range(len(similarites)), key=similarites.__getitem__)
-    print(f"\nLe vecteur le plus similaire dans la matrice est à l'indice {indice_max_similarity}")
-    print(f"Similarité : {similarites[indice_max_similarity]}")
+#
+# ####Partie 2###
+#
+# print("\nPARTIE 2 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+#       ""
+#       ":\n")
+#
+# tf_idf_vector = calculate_tf_idf_vector(question_tokens, idf_scores, tfidf_matrix)
+# print("Vecteur TF-IDF pour la question:", tf_idf_vector)
+#
+# #4
+#
+# similarites = []
+#
+# for vecteur in tfidf_matrix:
+#     similarity = cosine_similarity(tf_idf_vector, vecteur)
+#
+#     if isinstance(similarity, float):
+#         similarites.append(similarity)
+#         print(f"Similarité avec le vecteur {vecteur} : {similarity}")
+#     else:
+#         print(f"Similarité avec le vecteur {vecteur} : {similarity}")
+#
+# # Si le calcul est possible, trouver l'indice du vecteur le plus similaire
+# if similarites:
+#     indice_max_similarity = max(range(len(similarites)), key=similarites.__getitem__)
+#     print(f"\nLe vecteur le plus similaire dans la matrice est à l'indice {indice_max_similarity}")
+#     print(f"Similarité : {similarites[indice_max_similarity]}")
 
 
 
